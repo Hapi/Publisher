@@ -47,7 +47,7 @@ final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 			return (PSI)retVal;
 
 		final ConcurrentMap<Object, Method> objMethodCache = new ConcurrentHashMap<Object, Method>();
-		retVal =
+		Object newRetVal =
 			Proxy.newProxyInstance(
 				_substituteInterface.getClassLoader(),
 				new Class[] {_substituteInterface},
@@ -61,13 +61,15 @@ final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 						Method objMethod = objMethodCache.get(methodKey);
 						try {
 							if(objMethod == null) {
-								objMethod =
+								Method newObjMethod =
 									obj.getClass().getDeclaredMethod(
 										siMethod.getName(),
 										siMethod.getParameterTypes()
 									);
+								objMethod = objMethodCache.putIfAbsent(methodKey, newObjMethod);
+								if(objMethod == null)
+									objMethod = newObjMethod;
 								objMethod.setAccessible(true);
-								objMethodCache.putIfAbsent(methodKey, objMethod);
 							}
 							return objMethod.invoke(obj, args);
 						}
@@ -89,7 +91,9 @@ final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 					}
 				}
 			);
-		_substituteCache.putIfAbsent(_substituteInterface, retVal);
+		retVal = _substituteCache.putIfAbsent(_substituteInterface, newRetVal);
+		if(retVal == null)
+			retVal = newRetVal;
 		return (PSI)retVal;
 	}
 }

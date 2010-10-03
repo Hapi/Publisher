@@ -4,10 +4,10 @@ README - publisher
 
 DESCRIPTION
 -----------
-'publisher' is a Java utility library to make private methods public type safely. In practice this
-means that class interface can be designed properly (i.e. no unnecessary methods published) but
-still unit tests can be written to test private methods. 'publisher' is meant to be used in unit
-tests only. Of course it can be used anywhere but this, however, is not recommended.
+'publisher' is a Java utility library to make private methods public in a type safe manner. In
+practice this means that class interface can be designed properly (i.e. no unnecessary methods
+published) but still unit tests can be written to test private methods. 'publisher' is meant to
+be used in unit tests only. Of course it can be used anywhere but this, however, is not recommended.
 
 DO NOT USE THIS LIBRARY ANYWHERE IN PRODUCTION!
 As mentioned, 'publisher' is made for unit testing purpouses only. If the target JVM has Java
