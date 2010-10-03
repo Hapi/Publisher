@@ -4,9 +4,11 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.hapiware.util.publisher.annotation.ConcurrentIdentityHashed;
+import com.hapiware.util.publisher.annotation.ConcurrentIdentityHashCaching;
 import com.hapiware.util.publisher.annotation.Id;
-import com.hapiware.util.publisher.annotation.IdentityHashed;
+import com.hapiware.util.publisher.annotation.IdAnnotationError;
+import com.hapiware.util.publisher.annotation.IdentityHashCaching;
+import com.hapiware.util.publisher.annotation.NoCaching;
 
 
 public class Publisher<INTERFACE>
@@ -30,24 +32,26 @@ public class Publisher<INTERFACE>
 	}
 	
 	public static <INTERFACE> Publisher<INTERFACE> create(
-		final Class<INTERFACE> publicationInterface
+		final Class<INTERFACE> substituteInterface
 	)
 	{
 		Publisher<INTERFACE> p = new Publisher<INTERFACE>();
-		p._publishingPolicy = findPublishingPolicy(publicationInterface);
+		p._publishingPolicy = findPublishingPolicy(substituteInterface);
 		return p;
 	}
 
 	private static <INTERFACE> PublishingPolicy<INTERFACE> findPublishingPolicy(
-		final Class<INTERFACE> publicationInterface
+		final Class<INTERFACE> substituteInterface
 	)
 	{
-		if(publicationInterface.isAnnotationPresent(IdentityHashed.class))
-			return new IdentityHashedCachingPublisher<INTERFACE>(publicationInterface);
-		if(publicationInterface.isAnnotationPresent(ConcurrentIdentityHashed.class))
-			return new ConcurrentIdentityHashedCachingPublisher<INTERFACE>(publicationInterface);
+		if(substituteInterface.isAnnotationPresent(NoCaching.class))
+			return new NonCachingPublishingPolicy<INTERFACE>(substituteInterface);
+		if(substituteInterface.isAnnotationPresent(IdentityHashCaching.class))
+			return new IdentityHashedCachingPublishingPolicy<INTERFACE>(substituteInterface);
+		if(substituteInterface.isAnnotationPresent(ConcurrentIdentityHashCaching.class))
+			return new ConcurrentIdentityHashedCachingPublishingPolicy<INTERFACE>(substituteInterface);
 
-		Method[] methods = publicationInterface.getDeclaredMethods();
+		Method[] methods = substituteInterface.getDeclaredMethods();
 		int numberOfAnnotations = 0;
 		int expectedTotalIdSum = 0;
 		int i = 0;
@@ -61,32 +65,32 @@ public class Publisher<INTERFACE>
 				continue;
 			
 			if(id.value() < 0)
-				throw new RuntimeException("@Id values cannot be negative numbers.");
+				throw new IdAnnotationError("@Id values cannot be negative numbers.");
 			numberOfAnnotations++;
 			if(id.value() == 0)
 				idZeroFound = true;
 			
 			if(!set.add(id.value()))
-				throw new RuntimeException("Same @Id values are not allowed");
+				throw new IdAnnotationError("Same @Id values are not allowed.");
 			totalIdSum += id.value();
 		}
 		if(numberOfAnnotations == 0)
-			return new NonCachingPublisher<INTERFACE>(publicationInterface);
+			return new NonCachingPublishingPolicy<INTERFACE>(substituteInterface);
 		if(methods.length != numberOfAnnotations)
-			throw new RuntimeException("Every method needs @Id (or none of them).");
+			throw new IdAnnotationError("Every substitute method needs @Id.");
 		if(!idZeroFound)
-			throw new RuntimeException("@Id values must start from zero (0).");
+			throw new IdAnnotationError("@Id values must start from zero (0).");
 		if(expectedTotalIdSum != totalIdSum)
-			throw new RuntimeException("@Id values must be sequential.");
+			throw new IdAnnotationError("@Id values must be sequential.");
 		
-		return new CachingPublisher<INTERFACE>(publicationInterface);
+		return new CachingPublishingPolicy<INTERFACE>(substituteInterface);
 	}
 	
 	public static <INTERFACE> INTERFACE publish(
-		final Class<INTERFACE> publicationInterface,
+		final Class<INTERFACE> substituteInterface,
 		final Object obj
 	)
 	{
-		return (INTERFACE)findPublishingPolicy(publicationInterface).publish(obj);
+		return (INTERFACE)findPublishingPolicy(substituteInterface).publish(obj);
 	}
 }

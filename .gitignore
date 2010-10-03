@@ -1,6 +1,6 @@
 target
 bin
-temp
+temp*
 test-output
 .settings
 .classpath

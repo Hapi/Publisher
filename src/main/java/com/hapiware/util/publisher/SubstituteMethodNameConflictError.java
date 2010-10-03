@@ -1,13 +1,13 @@
 package com.hapiware.util.publisher;
 
 
-public class WrapperMethodNameConflictError
+public class SubstituteMethodNameConflictError
 	extends
 		Error
 {
 	private static final long serialVersionUID = -3939427103471236096L;
 
-	public WrapperMethodNameConflictError(String signature, Throwable cause)
+	public SubstituteMethodNameConflictError(String signature, Throwable cause)
 	{
 		super(
 			"\nWrapper interface has a method name which does not exist " 

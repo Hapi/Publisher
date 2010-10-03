@@ -2,49 +2,36 @@ package com.hapiware.util.publisher;
 
 public class PrivateMethods
 {
-	public static void main(String[] args)
+	@SuppressWarnings("unused")
+	private static void doSomething()
 	{
-		PrivateMethods m = new PrivateMethods();
-		doSomething();
-		m.doSomethingElse();
-		m.add("Miu", "mau");
-		System.out.println("Tulos = " + m.add(1.0, 3.14));
+		// Does nothing. This just for testing void return value in the substitute.
 	}
 	
-	final private static void doSomething()
+	@SuppressWarnings("unused")
+	private final String superAlgorithm(String value, int num)
 	{
-		System.out.println("(private) Somehting...");
+		String retVal = "";
+		for(int i = 0; i < num; i++)
+			retVal += value;
+		return retVal;
 	}
 	
-	final private void doSomethingElse()
-	{
-		System.out.println("(private) Something else: ");
-	}
-	
+	@SuppressWarnings("unused")
 	private String add(String a, String b)
 	{
 		return a + b;
 	}
 	
+	@SuppressWarnings("unused")
 	private double add(double a, double b)
 	{
 		return a + b;
 	}
 	
+	@SuppressWarnings("unused")
 	private int add(int a, int b)
 	{
 		return a + b;
-	}
-	
-	
-	
-	void miumau()
-	{
-		System.out.println("(private) miu");
-	}
-	
-	final void miumauFinal()
-	{
-		System.out.println("(private) miu final");
 	}
 }
