@@ -13,7 +13,7 @@ import com.hapiware.util.publisher.annotation.NoCaching;
 
 /**
  * {@code Publisher} is a Java utility library to make private methods public with a type safe
- * manner, Type safety is created by using <i>public substitute interfaces</i> (or <i>substitute
+ * manner. Type safety is created by using <i>public substitute interfaces</i> (or <i>substitute
  * interface</i> for short). Substitute interface is a Java {@code interface} where all the wanted
  * private methods are duplicated. Publishing a substitute interface creates a <i>public substitute
  * object</i> (or <i>substitute object</i> for short) which can be used to write unit tests for
