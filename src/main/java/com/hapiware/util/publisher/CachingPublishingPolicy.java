@@ -8,11 +8,19 @@ import java.util.Map;
 
 import com.hapiware.util.publisher.annotation.Id;
 
-public class CachingPublishingPolicy<INTERFACE>
+
+/**
+ * A caching publishing policy for {@link Publisher}.
+ * 
+ * @author <a href="http://www.hapiware.com" target="_blank">hapi</a>
+ *
+ * @param <PSI>
+ */
+final public class CachingPublishingPolicy<PSI>
 	extends
 		PublishingPolicyBase
 	implements 
-		PublishingPolicy<INTERFACE>
+		PublishingPolicy<PSI>
 {
 	private final static Map<Class<?>, Object> _substituteCache = new HashMap<Class<?>, Object>();
 	private final Class<?> _substituteInterface;
@@ -22,12 +30,13 @@ public class CachingPublishingPolicy<INTERFACE>
 		_substituteInterface = substituteInterface;
 	}
 
+	
 	@SuppressWarnings("unchecked")
-	public INTERFACE publish(final Object obj)
+	public PSI publish(final Object obj)
 	{
 		Object retVal = _substituteCache.get(_substituteInterface);
 		if(retVal != null)
-			return (INTERFACE)retVal;
+			return (PSI)retVal;
 
 		final Method[] objMethodCache = new Method[_substituteInterface.getDeclaredMethods().length];
 		retVal =
@@ -73,7 +82,7 @@ public class CachingPublishingPolicy<INTERFACE>
 				}
 			);
 		_substituteCache.put(_substituteInterface, retVal);
-		return (INTERFACE)retVal;
+		return (PSI)retVal;
 	}
 
 }

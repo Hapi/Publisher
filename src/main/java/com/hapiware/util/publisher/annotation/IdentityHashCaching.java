@@ -7,6 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+/**
+ * {@code @IdentityHashCaching} is used to introduce a identity hash caching policy. <u>This
+ * is not a recommended caching policy.</u>
+ * 
+ * @author <a href="http://www.hapiware.com" target="_blank">hapi</a>
+ *
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

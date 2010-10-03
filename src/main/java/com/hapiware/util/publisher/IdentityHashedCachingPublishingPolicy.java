@@ -6,11 +6,26 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-public class IdentityHashedCachingPublishingPolicy<INTERFACE>
+
+/**
+ * An identity hashed caching publishing policy for {@link Publisher}. 
+ * <p>
+ * The problem with the identity hash caching is that because Java does not have any public identity
+ * for objects then the closest relative was selected which is {@link System#identityHashCode(Object)}.
+ * Usually this works but there is no guarantee that the {@link System#identityHashCode(Object)}
+ * returns a different value for different objects (i.e. substitute interface {@link Method}s for
+ * caching purpouses) and thus the caching policy may fail.
+ * 
+ * @author <a href="http://www.hapiware.com" target="_blank">hapi</a>
+ *
+ * @param <PSI>
+ * 		A public substitute interface.
+ */
+final public class IdentityHashedCachingPublishingPolicy<PSI>
 	extends
 		PublishingPolicyBase
 	implements 
-		PublishingPolicy<INTERFACE>
+		PublishingPolicy<PSI>
 {
 	private final static Map<Class<?>, Object> _substituteCache = new HashMap<Class<?>, Object>();
 	private final Class<?> _substituteInterface;
@@ -21,12 +36,13 @@ public class IdentityHashedCachingPublishingPolicy<INTERFACE>
 		_substituteInterface = substituteInterface;
 	}
 
+	
 	@SuppressWarnings("unchecked")
-	public INTERFACE publish(final Object obj)
+	public PSI publish(final Object obj)
 	{
 		Object retVal = _substituteCache.get(_substituteInterface);
 		if(retVal != null)
-			return (INTERFACE)retVal;
+			return (PSI)retVal;
 
 		final Map<Object, Method> objMethodCache = new HashMap<Object, Method>();
 		retVal =
@@ -72,6 +88,6 @@ public class IdentityHashedCachingPublishingPolicy<INTERFACE>
 				}
 			);
 		_substituteCache.put(_substituteInterface, retVal);
-		return (INTERFACE)retVal;
+		return (PSI)retVal;
 	}
 }

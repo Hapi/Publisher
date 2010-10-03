@@ -22,6 +22,8 @@ public class IdOkTest
 		public double add(double a, double b);
 		@Id(4)
 		public int add(int a, int b);
+		@Id(5)
+		public byte[] concat(byte[] left, byte[] right);
 	}
 	@Test
 	public void idOk()
@@ -35,5 +37,9 @@ public class IdOkTest
 		assertEquals(616, substitute.add(313, 303));
 		assertEquals(-270.02, substitute.add(3.14, -273.16), 0.000001);
 		assertEquals("Hello World!", substitute.add("Hello ", "World!"));
+		byte[] left = { 1, 2, 3, 4 };
+		byte[] right = { 10, 20, 30, 40, 50 };
+		byte[] result = substitute.concat(left, right);
+		assertEquals(9, result.length);
 	}
 }

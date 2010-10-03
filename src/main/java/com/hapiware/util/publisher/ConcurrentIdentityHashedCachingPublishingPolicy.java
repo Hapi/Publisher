@@ -6,11 +6,27 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class ConcurrentIdentityHashedCachingPublishingPolicy<INTERFACE>
+/**
+ * A concurrent identity hashed caching publishing policy for {@link Publisher}. The map used
+ * for {@code ConcurrentIdentityHashedCachingPublishingPolicy} is {@link ConcurrentMap} but
+ * otherwise the implementation does not differ from {@link IdentityHashedCachingPublishingPolicy}.
+ * <p>
+ * The problem with the identity hash caching is that because Java does not have any public identity
+ * for objects then the closest relative was selected which is {@link System#identityHashCode(Object)}.
+ * Usually this works but there is no guarantee that the {@link System#identityHashCode(Object)}
+ * returns a different value for different objects (i.e. substitute interface {@link Method}s for
+ * caching purpouses) and thus the caching policy may fail.
+ * 
+ * @author <a href="http://www.hapiware.com" target="_blank">hapi</a>
+ *
+ * @param <PSI>
+ * 		A public substitute interface.
+ */
+final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 	extends
 		PublishingPolicyBase
 	implements 
-		PublishingPolicy<INTERFACE>
+		PublishingPolicy<PSI>
 {
 	private final static ConcurrentMap<Class<?>, Object> _substituteCache =
 		new ConcurrentHashMap<Class<?>, Object>();
@@ -22,12 +38,13 @@ public class ConcurrentIdentityHashedCachingPublishingPolicy<INTERFACE>
 		_substituteInterface = substituteInterface;
 	}
 
+	
 	@SuppressWarnings("unchecked")
-	public INTERFACE publish(final Object obj)
+	public PSI publish(final Object obj)
 	{
 		Object retVal = _substituteCache.get(_substituteInterface);
 		if(retVal != null)
-			return (INTERFACE)retVal;
+			return (PSI)retVal;
 
 		final ConcurrentMap<Object, Method> objMethodCache = new ConcurrentHashMap<Object, Method>();
 		retVal =
@@ -73,6 +90,6 @@ public class ConcurrentIdentityHashedCachingPublishingPolicy<INTERFACE>
 				}
 			);
 		_substituteCache.putIfAbsent(_substituteInterface, retVal);
-		return (INTERFACE)retVal;
+		return (PSI)retVal;
 	}
 }

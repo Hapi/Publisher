@@ -5,11 +5,19 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 
-public class NonCachingPublishingPolicy<INTERFACE>
+/**
+ * A non-caching publishing policy for {@link Publisher}.
+ * 
+ * @author <a href="http://www.hapiware.com" target="_blank">hapi</a>
+ *
+ * @param <PSI>
+ * 		A public substitute interface.
+*/
+final public class NonCachingPublishingPolicy<PSI>
 	extends
 		PublishingPolicyBase
 	implements 
-		PublishingPolicy<INTERFACE>
+		PublishingPolicy<PSI>
 {
 	private final Class<?> _substituteInterface;
 	
@@ -18,11 +26,12 @@ public class NonCachingPublishingPolicy<INTERFACE>
 		_substituteInterface = substituteInterface;
 	}
 
+	
 	@SuppressWarnings("unchecked")
-	public INTERFACE publish(final Object obj)
+	public PSI publish(final Object obj)
 	{
 		return
-			(INTERFACE)Proxy.newProxyInstance(
+			(PSI)Proxy.newProxyInstance(
 				_substituteInterface.getClassLoader(),
 				new Class[] {_substituteInterface},
 				new InvocationHandler()

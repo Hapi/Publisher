@@ -34,4 +34,14 @@ public class PrivateMethods
 	{
 		return a + b;
 	}
+	
+	@SuppressWarnings("unused")
+	private byte[] concat(byte[] left, byte[] right)
+	{
+		byte[] retVal = new byte[left.length + right.length];
+		System.arraycopy(left, 0, retVal, 0, left.length);
+		System.arraycopy(right, 0, retVal, left.length, right.length);
+		return retVal;
+	}
+	
 }
