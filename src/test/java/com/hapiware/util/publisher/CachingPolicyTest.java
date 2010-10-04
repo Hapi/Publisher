@@ -11,8 +11,8 @@ public class CachingPolicyTest
 {
 	private interface SPublisher
 	{
-		public <INTERFACE> PublishingPolicy<INTERFACE> findPublishingPolicy(
-			final Class<INTERFACE> substituteInterface
+		public <PSI> PublishingPolicy<PSI> findPublishingPolicy(
+			final Class<PSI> substituteInterface
 		);
 	}
 	

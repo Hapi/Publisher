@@ -41,5 +41,9 @@ public class IdOkTest
 		byte[] right = { 10, 20, 30, 40, 50 };
 		byte[] result = substitute.concat(left, right);
 		assertEquals(9, result.length);
+		int total = 0;
+		for(byte b : result)
+			total += b;
+		assertEquals(160, total);
 	}
 }

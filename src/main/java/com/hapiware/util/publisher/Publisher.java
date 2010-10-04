@@ -3,7 +3,6 @@ package com.hapiware.util.publisher;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 
 import com.hapiware.util.publisher.annotation.ConcurrentIdentityHashCaching;
 import com.hapiware.util.publisher.annotation.Id;
@@ -13,11 +12,11 @@ import com.hapiware.util.publisher.annotation.NoCaching;
 
 /**
  * {@code Publisher} is a Java utility library to make private methods public in a type safe
- * manner. Type safety is created by using <i>public substitute interfaces</i> (or <i>substitute
- * interface</i> for short). Substitute interface is a Java {@code interface} where all the wanted
- * private methods are duplicated. Publishing a substitute interface creates a <i>public substitute
- * object</i> (or <i>substitute object</i> for short) which can be used to write unit tests for
- * private methods.
+ * manner very easily. Type safety is created by using <i>public substitute interfaces</i> (or
+ * <i>substitute interface</i> for short). Substitute interface is a Java {@code interface} where
+ * all the wanted private methods from the class to be substituted are duplicated. Publishing
+ * a substitute interface creates a <i>public substitute object</i> (or <i>substitute object</i>
+ * for short) which can be used to write unit tests for private methods of the substituted class.
  * <p>
  * Using {@code Publisher} is a very convenient way to write unit tests for private methods and
  * still maintain type safety.
@@ -71,6 +70,10 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  *		byte[] right = { 10, 20, 30, 40, 50 };
  *		byte[] result = substitute.concat(left, right);
  *		assertEquals(9, result.length);
+ *		int total = 0;
+ *		for(byte b : result)
+ *			total += b;
+ *		assertEquals(160, total);
  *	}
  * </pre>
  * 
@@ -148,9 +151,13 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  * Because the implementation relies on {@link java.lang.reflect.Proxy} the performance is not
  * as good as with direct calls (which, of course, cannot be made to {@code private} methods).
  * To improve performance {@code Publisher} can be directed to use different caching policies.
- * A caching policy is selected with an annotation and only one of them is really recommended
- * (<a href="#publisher-normal-caching">the one created with {@link Id} annotation</a>) and
- * the others are to be used at the user's own risk.
+ * A caching policy is selected with annotations. There are several different publishing policies
+ * implemented but only one of them is really recommended and it is called normal caching
+ * (<a href="#publisher-normal-caching">the one created with {@link Id} annotation</a>).
+ * The others can be used but at the user's own risk.
+ * <p>
+ * There is also a simple trick to improve performance with a {@link NoCaching} annotation.
+ * For more information see <a href="#publisher-disabling-caching">Disabling caching</a>.
  * 
  * 
  * <h4><a name="publisher-normal-caching">Normal caching</a></h4>
@@ -196,6 +203,10 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  * 	}
  * </pre>
  * 
+ * <b>Notice</b> also that <u>using a {@link NoCaching} annotation can improve performance</u>
+ * because other annotations are not checked and thus the time used for finding a proper publishing
+ * policy is greatly diminished. This is true even if no {@link Id} annotations are used. 
+ * 
  * 
  * <h4><a name="publisher-identity-hash-caching">Identity hash caching</a></h4>
  * <u>*** Identity hash caching policy IS NOT RECOMMENDED. Use at your own risk!!! ***</u> See
@@ -218,14 +229,17 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  * 
  * Comparing to the <a href="#publisher-normal-caching">normal caching</a> the identity hash
  * caching has roughly twice as good performance and it is much simpler to use because the only
- * annotation needed is {@link IdentityHashCaching} annotation. However, the problem with
- * the identity hash caching is that because Java does not have any public identity for objects
- * then the closest relative was selected which is {@link System#identityHashCode(Object)}. Usually
- * this works but there is no guarantee that the {@link System#identityHashCode(Object)} returns
- * a different value for different objects (i.e. substitute interface {@link Method}s for caching
- * purpouses) and thus the caching policy may fail. When you start seeing {@link ClassCastException}s
- * then it means that there is a naming conflict and you <u>must</u> change your caching policy.
- * There are three options:
+ * annotation needed is {@link IdentityHashCaching} annotation. However, the problem with the
+ * identity hash caching is that Java does not have any public identity for objects. The closest
+ * alternative to the object identity is {@link System#identityHashCode(Object)}. Usually this works
+ * but there is no guarantee that the {@link System#identityHashCode(Object)} returns a different
+ * value for different objects (i.e. substitute interface {@link Method}s in this case) and thus
+ * the caching policy may fail.
+ * <p>
+ * When you start seeing {@link ClassCastException}s, {@link NullPointerException}s,
+ * {@link UndeclaredThrowableException}s or {@link AmbiguousMethodNameError}s then it means that
+ * there is a hash key conflict and you <u>must</u> change your caching policy. There are three
+ * options available:
  * 	<ul>
  * 		<li>Use <a href="#publisher-normal-caching">normal caching</a></li>
  * 		<li><a href="#publisher-disabling-caching">Disable caching</a></li>
@@ -254,7 +268,7 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  * 	}
  * </pre>
  * 
- * This and <a href="#publisher-identity-hash-caching">identity hash caching</a> are the same
+ * This and <a href="#publisher-identity-hash-caching">identity hash caching</a> have the same
  * caching policy except concurrent identity hash caching policy uses {@link ConcurrentMap}
  * for caching. Concurrent caching policy is a little bit slower but otherwise all which is true
  * for <a href="#publisher-identity-hash-caching">identity hash caching</a> is true for concurrent
