@@ -90,7 +90,7 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  *		Publisher<SHashGenerator> publisher = Publisher.create(SHashGenerator.class);
  *		for(int i = 0; i < _table.length; i++) {
  *			HashGenerator hashGenerator = new HashGenerator(i);
- *			SHashGenerator substitute = Publisher.publish(hashGenerator);
+ *			SHashGenerator substitute = publisher.publish(hashGenerator);
  *			String result = substitute.createDigest("sha-1", _table[i]);
  *			// Make assertions.
  *		}
