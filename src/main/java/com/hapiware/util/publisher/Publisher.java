@@ -39,7 +39,7 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  * 			// Some implementation.
  * 		}
  * 		...
- * 		private byte[] concat(byte[] left, byte[] right)
+ * 		private static byte[] concat(byte[] left, byte[] right)
  * 		{
  * 			byte[] retVal = new byte[left.length + right.length];
  * 			System.arraycopy(left, 0, retVal, 0, left.length);
@@ -96,6 +96,37 @@ import com.hapiware.util.publisher.annotation.NoCaching;
  *		}
  *	}
  * </pre>
+ *
+ * 
+ * <h4><a name="publisher-static-methods">Static methods</a></h4>
+ * If there is a need to test only private static methods of the substituted class
+ * {@link #publish(Class, Class)} method can be used. The benefit is that there is no need to
+ * create an instance of the substituted class. Let's change the {@code concatTest()} example test
+ * method above to use {@link #publish(Class, Class)} method. A substitute interface would be:
+ * <pre>
+ * 	interface SHashGenerator
+ * 	{
+ * 		public byte[] concat(byte[] left, byte[] right);
+ * 	}
+ * </pre>
+ * 
+ * And the unit test:
+ * <pre>
+ * 	{@code @Test}
+ *	public void concatTest()
+ *	{
+ *		SHashGenerator substitute = Publisher.publish(SHashGenerator.class, HashGenerator.class);
+ *		byte[] left = { 1, 2, 3, 4 };
+ *		byte[] right = { 10, 20, 30, 40, 50 };
+ *		byte[] result = substitute.concat(left, right);
+ *		assertEquals(9, result.length);
+ *		int total = 0;
+ *		for(byte b : result)
+ *			total += b;
+ *		assertEquals(160, total);
+ *	}
+ * </pre>
+ * 
  * 
  * 
  * <h4>Exceptions</h4>
@@ -310,7 +341,7 @@ final public class Publisher<PSI>
 	 * @param substituteInterface
 	 * 		A substitute interface class.
 	 * 
-	 * @param obj
+	 * @param substitutedObject
 	 * 		An object to be substituted (i.e. the object which does the real work).
 	 * 
 	 * @return
@@ -324,10 +355,39 @@ final public class Publisher<PSI>
 	 */
 	public static <PSI> PSI publish(
 		final Class<PSI> substituteInterface,
-		final Object obj
+		final Object substitutedObject
 	)
 	{
-		return (PSI)findPublishingPolicy(substituteInterface).publish(obj);
+		return (PSI)findPublishingPolicy(substituteInterface).publish(substitutedObject);
+	}
+	
+	/**
+	 * Creates a substitute object for a class which have private static methods to be published.
+	 * 
+	 * @param <PSI>
+	 * 		A public substitute interface.
+	 * 
+	 * @param substituteInterface
+	 * 		A substitute interface class.
+	 * 
+	 * @param substitutedClass
+	 * 		A class to be substituted (i.e. the class which static methods do the real work).
+	 * 
+	 * @return
+	 * 		A substitute object.
+	 * 
+	 * @throws SubstituteMethodNameConflictError
+	 * 		If substitute interface has a method which does not exist in the substituted class. 
+	 * 
+	 * @throws IdAnnotationError
+	 * 		If any of the {@link Id} constraints are broken.
+	 */
+	public static <PSI> PSI publish(
+		final Class<PSI> substituteInterface,
+		final Class<?> substitutedClass
+	)
+	{
+		return (PSI)findPublishingPolicy(substituteInterface).publish(substitutedClass);
 	}
 	
 	/**
@@ -336,7 +396,7 @@ final public class Publisher<PSI>
 	 * other places where the substitute objects are created in a frequent manner. See
 	 * <a href="#publisher-usage-with-loops">Usage with loops</a>.
 	 * 
-	 * @param obj
+	 * @param substitutedObject
 	 * 		An object to be substituted (i.e. the object which does the real work).
 	 * 
 	 * @return
@@ -347,9 +407,9 @@ final public class Publisher<PSI>
 	 * 
 	 *  @see #create(Class)
 	 */
-	public PSI publish(final Object obj)
+	public PSI publish(final Object substitutedObject)
 	{
-		return (PSI)_publishingPolicy.publish(obj);
+		return (PSI)_publishingPolicy.publish(substitutedObject);
 	}
 
 	/**
@@ -386,7 +446,6 @@ final public class Publisher<PSI>
 	 * Finds a proper publishing policy based on selected annotations.
 	 * 
 	 * @param <PSI>
-	 * @param <PSI>
 	 * 		A public substitute interface.
 	 * 
 	 * @param substituteInterface
@@ -394,11 +453,20 @@ final public class Publisher<PSI>
 	 * 
 	 * @return
 	 * 		A publishing policy.
+	 * 
+	 * @throws IllegalArgumentException
+	 * 		If {@code substituteInterface} argument is not an interface.
 	 */
 	private static <PSI> PublishingPolicy<PSI> findPublishingPolicy(
 		final Class<PSI> substituteInterface
 	)
 	{
+		if(!substituteInterface.isInterface())
+			throw
+				new IllegalArgumentException(
+					"'substituteInterface' class must be an interface. Was: "
+						+ substituteInterface.getName() + "."
+				);
 		if(substituteInterface.isAnnotationPresent(NoCaching.class))
 			return new NonCachingPublishingPolicy<PSI>(substituteInterface);
 		if(substituteInterface.isAnnotationPresent(IdentityHashCaching.class))

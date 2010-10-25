@@ -31,8 +31,20 @@ final public class CachingPublishingPolicy<PSI>
 	}
 
 	
+	public PSI publish(final Object substitutedObject)
+	{
+		return publish(substitutedObject.getClass(), substitutedObject);
+	}
+
+
+	public PSI publish(Class<?> substitutedClass)
+	{
+		return publish(substitutedClass, null);
+	}
+
+	
 	@SuppressWarnings("unchecked")
-	public PSI publish(final Object obj)
+	private PSI publish(final Class<?> substitutedClass, final Object substitutedObject)
 	{
 		Object retVal = _substituteCache.get(_substituteInterface);
 		if(retVal != null)
@@ -54,14 +66,14 @@ final public class CachingPublishingPolicy<PSI>
 						try {
 							if(objMethod == null) {
 								objMethod =
-									obj.getClass().getDeclaredMethod(
+									substitutedClass.getDeclaredMethod(
 										siMethod.getName(),
 										siMethod.getParameterTypes()
 									);
 								objMethod.setAccessible(true);
 								objMethodCache[id.value()] = objMethod;
 							}
-							return objMethod.invoke(obj, args);
+							return objMethod.invoke(substitutedObject, args);
 						}
 						catch(NoSuchMethodException ex) {
 							throw 
@@ -84,5 +96,4 @@ final public class CachingPublishingPolicy<PSI>
 		_substituteCache.put(_substituteInterface, retVal);
 		return (PSI)retVal;
 	}
-
 }

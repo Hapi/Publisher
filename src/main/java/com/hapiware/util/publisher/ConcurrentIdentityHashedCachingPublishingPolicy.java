@@ -39,8 +39,20 @@ final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 	}
 
 	
+	public PSI publish(final Object substitutedObject)
+	{
+		return publish(substitutedObject.getClass(), substitutedObject);
+	}
+
+
+	public PSI publish(Class<?> substitutedClass)
+	{
+		return publish(substitutedClass, null);
+	}
+
+	
 	@SuppressWarnings("unchecked")
-	public PSI publish(final Object obj)
+	private PSI publish(final Class<?> substitutedClass, final Object substitutedObject)
 	{
 		Object retVal = _substituteCache.get(_substituteInterface);
 		if(retVal != null)
@@ -62,7 +74,7 @@ final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 						try {
 							if(objMethod == null) {
 								Method newObjMethod =
-									obj.getClass().getDeclaredMethod(
+									substitutedClass.getDeclaredMethod(
 										siMethod.getName(),
 										siMethod.getParameterTypes()
 									);
@@ -71,7 +83,7 @@ final public class ConcurrentIdentityHashedCachingPublishingPolicy<PSI>
 									objMethod = newObjMethod;
 								objMethod.setAccessible(true);
 							}
-							return objMethod.invoke(obj, args);
+							return objMethod.invoke(substitutedObject, args);
 						}
 						catch(NoSuchMethodException ex) {
 							throw 

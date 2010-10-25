@@ -27,8 +27,20 @@ final public class NonCachingPublishingPolicy<PSI>
 	}
 
 	
+	public PSI publish(final Object substitutedObject)
+	{
+		return publish(substitutedObject.getClass(), substitutedObject);
+	}
+
+
+	public PSI publish(Class<?> substitutedClass)
+	{
+		return publish(substitutedClass, null);
+	}
+
+	
 	@SuppressWarnings("unchecked")
-	public PSI publish(final Object obj)
+	private PSI publish(final Class<?> substitutedClass, final Object substitutedObject)
 	{
 		return
 			(PSI)Proxy.newProxyInstance(
@@ -42,12 +54,12 @@ final public class NonCachingPublishingPolicy<PSI>
 					{
 						try {
 							Method objMethod =
-								obj.getClass().getDeclaredMethod(
+								substitutedClass.getDeclaredMethod(
 									siMethod.getName(),
 									siMethod.getParameterTypes()
 								);
 							objMethod.setAccessible(true);
-							return objMethod.invoke(obj, args);
+							return objMethod.invoke(substitutedObject, args);
 						}
 						catch(NoSuchMethodException ex) {
 							throw 
@@ -56,9 +68,15 @@ final public class NonCachingPublishingPolicy<PSI>
 									ex
 								);
 						}
+						catch(NullPointerException ex) {
+							throw 
+								new StaticMethodConflictError(
+									createSignature(_substituteInterface.toString(), siMethod),
+									ex
+								);
+						}
 					}
 				}
 			);
 	}
-
 }

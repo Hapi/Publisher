@@ -36,7 +36,7 @@ public class PrivateMethods
 	}
 	
 	@SuppressWarnings("unused")
-	private byte[] concat(byte[] left, byte[] right)
+	private static byte[] concat(byte[] left, byte[] right)
 	{
 		byte[] retVal = new byte[left.length + right.length];
 		System.arraycopy(left, 0, retVal, 0, left.length);
