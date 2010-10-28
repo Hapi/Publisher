@@ -4,6 +4,27 @@
 	<groupId>com.hapiware.util</groupId>
 	<artifactId>publisher</artifactId>
 	<version>1.1.0</version>
+	<description>
+		'publisher' is a Java utility library to make private methods public in a type safe manner.
+	</description>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://github.com/Hapi/Publisher/raw/master/src/main/resources/LICENSE</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<url>http://github.com/Hapi/Publisher</url>
+		<connection>scm:git:http://github.com/Hapi/Publisher</connection>
+	</scm>
+	<developers>
+		<developer>
+			<id>hapi</id>
+			<name>Hapi</name>
+			<email>hapi@hapiware.com</email>
+		</developer>
+	</developers>
 	
 	<build>
 		<plugins>
@@ -22,6 +43,18 @@
 				<executions>
 					<execution>
 						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach</id>
 						<goals>
 							<goal>jar</goal>
 						</goals>
